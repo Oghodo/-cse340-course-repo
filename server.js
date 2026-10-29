@@ -24,15 +24,18 @@ app.use(express.static(path.join(__dirname, 'public')));
   * Routes
   */
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'src/views/home.html'));
+    const title = 'Home';
+  res.render('home', { title });
 });
 
 app.get('/organizations', (req, res) => {
-    res.sendFile(path.join(__dirname, 'src/views/organizations.html'));
+    const title = 'Organizations';
+    res.render('organizations', { title });
 });
 
 app.get('/projects', (req, res) => {
-    res.sendFile(path.join(__dirname, 'src/views/projects.html'));
+    const title = 'Projects';
+    res.render('projects', { title });
 });
 
 app.listen(PORT, () => {
