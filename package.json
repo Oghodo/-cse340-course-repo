@@ -1,14 +1,15 @@
+
 {
-  "name": "-cse340-course-repo",
+  "name": "cse340-course-repo",
   "version": "1.0.0",
-  "description": "",
-  "homepage": "[https://github.com/Oghodo/-cse340-course-repo]",
+  "description": "CSE 340 Service Network",
+  "homepage": "https://github.com/Oghodo/-cse340-course-repo",
   "bugs": {
-    "url": "[https://github.com/Oghodo/-cse340-course-repo]"
+    "url": "https://github.com/Oghodo/-cse340-course-repo/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+[https://github.com/Oghodo/-cse340-course-repo.git]"
+    "url": "https://github.com/Oghodo/-cse340-course-repo.git"
   },
   "license": "ISC",
   "author": "Omoregbe Oghodo",
@@ -19,6 +20,7 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "ejs": "^3.1.10",
     "express": "^5.2.1"
   },
   "devDependencies": {
