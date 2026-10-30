@@ -23,19 +23,25 @@ app.use(express.static(path.join(__dirname, 'public')));
 /**
   * Routes
   */
+  // home page
 app.get('/', (req, res) => {
     const title = 'Home';
   res.render('home', { title });
 });
-
+   // organizations page
 app.get('/organizations', (req, res) => {
     const title = 'Organizations';
     res.render('organizations', { title });
 });
-
+  // projects page
 app.get('/projects', (req, res) => {
     const title = 'Projects';
     res.render('projects', { title });
+});
+// Categories page
+app.get('/categories', (req, res) => {
+    const title = 'Categories';
+    res.render('categories', { title });
 });
 
 app.listen(PORT, () => {
