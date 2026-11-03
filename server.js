@@ -46,12 +46,14 @@ app.get('/categories', (req, res) => {
 });
 
 app.listen(PORT, async () => {
-  try {
+
+    try {
     await testConnection();
     console.log(`Server is running at http://127.0.0.1:${PORT}`);
     console.log(`Environment: ${NODE_ENV}`);
   } catch (error) {
     console.error('Error connecting to the database:', error);
+    process.exit(1); // Exit the process with an erro code
   }
 });
 
