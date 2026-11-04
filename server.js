@@ -46,9 +46,7 @@ app.get('/projects', (req, res) => {
 // Categories page
 app.get('/categories', async (req, res) => {
     const nav = await getNav();
-
     const categories = await getAllCategories();
-
     res.render('categories', {
         title: 'Service Project Categories',
         nav,
