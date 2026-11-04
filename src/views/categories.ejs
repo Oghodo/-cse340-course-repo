@@ -1,4 +1,3 @@
-
 <%- include('partials/header') %>
 
 <main>
@@ -7,12 +6,15 @@
     <section class="categories">
         <h2>Available Categories</h2>
 
-        <ul>
-            <li>Environmental</li>
-            <li>Educational</li>
-            <li>Community Service</li>
-            <li>Health and Wellness</li>
-        </ul>
+        <% if (categories && categories.length > 0) { %>
+            <ul>
+                <% categories.forEach(category => { %>
+                    <li><%= category.name %></li>
+                <% }) %>
+            </ul>
+        <% } else { %>
+            <p>No categories available.</p>
+        <% } %>
     </section>
 </main>
 
