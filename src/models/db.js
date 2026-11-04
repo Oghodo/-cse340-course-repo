@@ -13,8 +13,9 @@ import { Pool } from 'pg';
  * postgresql://username:password@host:port/database
  */
 const sslConfig =
- process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false;
- const pool = new Pool ({
+    process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : true;
+
+const pool = new Pool({
     connectionString: process.env.DB_URL,
     ssl: sslConfig,
  })
