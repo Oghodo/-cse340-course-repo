@@ -1,8 +1,8 @@
-
 import db from './db.js';
 
 /**
- * Get all projects from the database.
+ * Get all projects from the database
+ * along with their organization and category names.
  */
 const getAllProjects = async () => {
     try {
@@ -11,14 +11,17 @@ const getAllProjects = async () => {
                 p.project_id,
                 p.name,
                 p.description,
+                p.location,
+                p.project_date,
+                p.organization_id,
                 o.name AS organization_name,
                 c.name AS category_name
-            FROM project p
-            INNER JOIN organization o
+            FROM project AS p
+            INNER JOIN organization AS o
                 ON p.organization_id = o.organization_id
-            INNER JOIN category c
+            INNER JOIN category AS c
                 ON p.category_id = c.category_id
-            ORDER BY p.project_id ASC;
+            ORDER BY p.project_date ASC;
         `;
 
         const result = await db.query(query);

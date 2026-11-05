@@ -11,30 +11,21 @@ import { getAllProjects } from './src/models/projects.js';
 // Application Configuration
 // ========================================
 
-// Define the application environment
 const NODE_ENV = process.env.NODE_ENV?.toLowerCase() || 'production';
-
-// Define the port number
 const PORT = process.env.PORT || 3000;
 
-// Configure file paths
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Initialize the Express application
 const app = express();
 
 // ========================================
 // Express Middleware Configuration
 // ========================================
 
-// Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Set EJS as the templating engine
 app.set('view engine', 'ejs');
-
-// Configure the views directory
 app.set('views', path.join(__dirname, 'src/views'));
 
 // ========================================
@@ -52,35 +43,50 @@ app.get('/', (req, res) => {
 
 // Organizations page
 app.get('/organizations', async (req, res) => {
-    const organizations = await getAllOrganizations();
-    const title = 'Our Partner Organizations';
+    try {
+        const organizations = await getAllOrganizations();
+        const title = 'Our Partner Organizations';
 
-    res.render('organizations', {
-        title,
-        organizations
-    });
+        res.render('organizations', {
+            title,
+            organizations
+        });
+    } catch (error) {
+        console.error('Error loading organizations:', error);
+        res.status(500).send('Unable to load organizations.');
+    }
 });
 
 // Projects page
 app.get('/projects', async (req, res) => {
-    const projects = await getAllProjects();
-    const title = 'Projects';
+    try {
+        const projects = await getAllProjects();
+        const title = 'Service Projects';
 
-    res.render('projects', {
-        title,
-        projects
-    });
+        res.render('projects', {
+            title,
+            projects
+        });
+    } catch (error) {
+        console.error('Error loading projects:', error);
+        res.status(500).send('Unable to load service projects.');
+    }
 });
 
 // Categories page
 app.get('/categories', async (req, res) => {
-    const categories = await getAllCategories();
-    const title = 'Service Project Categories';
+    try {
+        const categories = await getAllCategories();
+        const title = 'Service Project Categories';
 
-    res.render('categories', {
-        title,
-        categories
-    });
+        res.render('categories', {
+            title,
+            categories
+        });
+    } catch (error) {
+        console.error('Error loading categories:', error);
+        res.status(500).send('Unable to load categories.');
+    }
 });
 
 // ========================================
@@ -93,6 +99,9 @@ app.listen(PORT, async () => {
 
         console.log(`Server is running at http://127.0.0.1:${PORT}`);
         console.log(`Environment: ${NODE_ENV}`);
+
+        const projects = await getAllProjects();
+        console.log(`Successfully retrieved ${projects.length} service projects.`);
     } catch (error) {
         console.error('Error connecting to the database:', error);
         process.exit(1);
