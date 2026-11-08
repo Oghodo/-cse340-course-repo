@@ -1,3 +1,4 @@
+
 <%- include('partials/header') %>
 
 <main>
@@ -9,7 +10,11 @@
         <% if (categories && categories.length > 0) { %>
             <ul>
                 <% categories.forEach(category => { %>
-                    <li><%= category.name %></li>
+                    <li>
+                        <a href="/category/<%= category.category_id %>">
+                            <%= category.name %>
+                        </a>
+                    </li>
                 <% }) %>
             </ul>
         <% } else { %>

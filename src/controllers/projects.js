@@ -4,13 +4,17 @@ import {
     getProjectDetails
 } from '../models/projects.js';
 
+import {
+    getCategoriesByProjectId
+} from '../models/categories.js';
+
 // Number of upcoming projects to display
 const NUMBER_OF_UPCOMING_PROJECTS = 5;
 
 /**
  * Display the upcoming service projects page.
  */
-const showProjectsPage = async (req, res) => {
+const showProjectsPage = async (req, res, next) => {
     try {
         const projects = await getUpcomingProjects(NUMBER_OF_UPCOMING_PROJECTS);
         const title = 'Upcoming Service Projects';
@@ -18,29 +22,37 @@ const showProjectsPage = async (req, res) => {
         res.render('projects', { title, projects });
     } catch (error) {
         console.error('Error displaying upcoming projects:', error);
-        res.status(500).send('An error occurred while retrieving upcoming projects.');
+        next(error);
     }
 };
 
 /**
- * Display details of a single service project.
+ * Display details of a single service project
+ * including its associated categories.
  */
-const showProjectDetailsPage = async (req, res) => {
+const showProjectDetailsPage = async (req, res, next) => {
     try {
         const id = req.params.id;
 
         const project = await getProjectDetails(id);
 
         if (!project) {
-            return res.status(404).send('Service project not found.');
+            const error = new Error('Service project not found.');
+            error.status = 404;
+            return next(error);
         }
 
+        const categories = await getCategoriesByProjectId(id);
         const title = project.title;
 
-        res.render('project', { title, project });
+        res.render('project', {
+            title,
+            project,
+            categories
+        });
     } catch (error) {
         console.error('Error displaying project details:', error);
-        res.status(500).send('An error occurred while retrieving project details.');
+        next(error);
     }
 };
 

@@ -10,33 +10,53 @@ import {
 import { getProjectsByOrganizationId } from '../models/projects.js';
 
 /**
- * Display all organizations
+ * Display all organizations.
  */
-const showOrganizationsPage = async (req, res) => {
-    const organizations = await getAllOrganizations();
-    const title = 'Our Partner Organizations';
+const showOrganizationsPage = async (req, res, next) => {
+    try {
+        const organizations = await getAllOrganizations();
+        const title = 'Our Partner Organizations';
 
-    res.render('organizations', { title, organizations });
+        res.render('organizations', { title, organizations });
+    } catch (error) {
+        console.error('Error displaying organizations:', error);
+        next(error);
+    }
 };
 
 /**
  * Display details of a specific organization
  * and its associated service projects.
  */
-const showOrganizationDetailsPage = async (req, res) => {
-    const organizationId = req.params.id;
+const showOrganizationDetailsPage = async (req, res, next) => {
+    try {
+        const organizationId = req.params.id;
 
-    const organizationDetails = await getOrganizationDetails(organizationId);
-    const projects = await getProjectsByOrganizationId(organizationId);
+        const organizationDetails = await getOrganizationDetails(organizationId);
 
-    const title = 'Organization Details';
+        if (!organizationDetails) {
+            const error = new Error('Organization not found.');
+            error.status = 404;
+            return next(error);
+        }
 
-    res.render('organization', {
-        title,
-        organizationDetails,
-        projects
-    });
+        const projects = await getProjectsByOrganizationId(organizationId);
+
+        const title = 'Organization Details';
+
+        res.render('organization', {
+            title,
+            organizationDetails,
+            projects
+        });
+    } catch (error) {
+        console.error('Error displaying organization details:', error);
+        next(error);
+    }
 };
 
 // Export controller functions
-export { showOrganizationsPage, showOrganizationDetailsPage };
+export {
+    showOrganizationsPage,
+    showOrganizationDetailsPage
+};

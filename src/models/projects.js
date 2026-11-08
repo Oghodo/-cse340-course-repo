@@ -119,10 +119,45 @@ const getProjectDetails = async (id) => {
     }
 };
 
+/**
+ * Get all service projects belonging to a specific category.
+ */
+const getProjectsByCategoryId = async (categoryId) => {
+    try {
+        const query = `
+            SELECT
+                p.project_id,
+                p.name AS title,
+                p.description,
+                p.location,
+                p.project_date AS date,
+                p.organization_id,
+                o.name AS organization_name,
+                c.category_id,
+                c.name AS category_name
+            FROM project AS p
+            INNER JOIN organization AS o
+                ON p.organization_id = o.organization_id
+            INNER JOIN category AS c
+                ON p.category_id = c.category_id
+            WHERE c.category_id = $1
+            ORDER BY p.project_date ASC;
+        `;
+
+        const result = await db.query(query, [categoryId]);
+
+        return result.rows;
+    } catch (error) {
+        console.error('Error retrieving projects by category:', error);
+        throw error;
+    }
+};
+
 // Export the model functions
 export {
     getAllProjects,
     getProjectsByOrganizationId,
     getUpcomingProjects,
-    getProjectDetails
+    getProjectDetails,
+    getProjectsByCategoryId
 };
