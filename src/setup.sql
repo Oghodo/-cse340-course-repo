@@ -255,7 +255,20 @@ VALUES
 
 
 -- ============================================================
--- 5. DATABASE VERIFICATION
+-- 5. FIX MISSING PROJECT LOCATIONS
+-- ============================================================
+
+-- Assign a default location to any project with a missing
+-- or empty location, provided Benin City is accurate.
+
+UPDATE project
+SET location = 'Benin City, Edo State, Nigeria'
+WHERE location IS NULL
+   OR TRIM(location) = '';
+
+
+-- ============================================================
+-- 6. DATABASE VERIFICATION
 -- ============================================================
 
 
@@ -281,7 +294,7 @@ ORDER BY project_id;
 
 
 -- ============================================================
--- 6. DISPLAY PROJECTS WITH ORGANIZATION AND CATEGORY NAMES
+-- 7. DISPLAY PROJECTS WITH ORGANIZATION AND CATEGORY NAMES
 -- ============================================================
 
 SELECT
@@ -301,7 +314,7 @@ ORDER BY p.project_id ASC;
 
 
 -- ============================================================
--- 7. VERIFY PROJECT COUNT PER ORGANIZATION
+-- 8. VERIFY PROJECT COUNT PER ORGANIZATION
 -- ============================================================
 
 SELECT
@@ -318,7 +331,7 @@ ORDER BY o.organization_id;
 
 
 -- ============================================================
--- 8. VERIFY PROJECT DATES
+-- 9. VERIFY PROJECT DATES AND LOCATIONS
 -- ============================================================
 
 -- Check for projects with missing dates
@@ -331,8 +344,19 @@ FROM project
 WHERE project_date IS NULL;
 
 
+-- Check for projects with missing locations
+
+SELECT
+    project_id,
+    name,
+    location
+FROM project
+WHERE location IS NULL
+   OR TRIM(location) = '';
+
+
 -- ============================================================
--- 9. DISPLAY THE NEXT FIVE UPCOMING SERVICE PROJECTS
+-- 10. DISPLAY THE NEXT FIVE UPCOMING SERVICE PROJECTS
 -- ============================================================
 
 SELECT
