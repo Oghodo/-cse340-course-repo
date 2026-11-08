@@ -1,3 +1,4 @@
+
 -- ============================================================
 -- CSE 340 SERVICE NETWORK DATABASE
 -- Database Setup Script
@@ -314,6 +315,40 @@ GROUP BY
     o.organization_id,
     o.name
 ORDER BY o.organization_id;
+
+
+-- ============================================================
+-- 8. VERIFY PROJECT DATES
+-- ============================================================
+
+-- Check for projects with missing dates
+
+SELECT
+    project_id,
+    name,
+    project_date
+FROM project
+WHERE project_date IS NULL;
+
+
+-- ============================================================
+-- 9. DISPLAY THE NEXT FIVE UPCOMING SERVICE PROJECTS
+-- ============================================================
+
+SELECT
+    p.project_id,
+    p.name AS title,
+    p.description,
+    p.project_date AS date,
+    p.location,
+    p.organization_id,
+    o.name AS organization_name
+FROM project AS p
+INNER JOIN organization AS o
+    ON p.organization_id = o.organization_id
+WHERE p.project_date >= CURRENT_DATE
+ORDER BY p.project_date ASC
+LIMIT 5;
 
 
 -- ============================================================

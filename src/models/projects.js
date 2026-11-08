@@ -57,6 +57,72 @@ const getProjectsByOrganizationId = async (organizationId) => {
     return result.rows;
 };
 
-// Export the model functions
-export { getAllProjects, getProjectsByOrganizationId };
+/**
+ * Get upcoming service projects from the database.
+ * Returns the specified number of projects,
+ * ordered by project date in ascending order.
+ */
+const getUpcomingProjects = async (number_of_projects) => {
+    try {
+        const query = `
+            SELECT
+                p.project_id,
+                p.name AS title,
+                p.description,
+                p.project_date AS date,
+                p.location,
+                p.organization_id,
+                o.name AS organization_name
+            FROM project AS p
+            INNER JOIN organization AS o
+                ON p.organization_id = o.organization_id
+            WHERE p.project_date >= CURRENT_DATE
+            ORDER BY p.project_date ASC
+            LIMIT $1;
+        `;
 
+        const result = await db.query(query, [number_of_projects]);
+
+        return result.rows;
+    } catch (error) {
+        console.error('Error retrieving upcoming projects:', error);
+        throw error;
+    }
+};
+
+/**
+ * Get details of a single service project by its ID.
+ */
+const getProjectDetails = async (id) => {
+    try {
+        const query = `
+            SELECT
+                p.project_id,
+                p.name AS title,
+                p.description,
+                p.project_date AS date,
+                p.location,
+                p.organization_id,
+                o.name AS organization_name
+            FROM project AS p
+            INNER JOIN organization AS o
+                ON p.organization_id = o.organization_id
+            WHERE p.project_id = $1;
+        `;
+
+        const result = await db.query(query, [id]);
+
+        return result.rows[0];
+    } catch (error) {
+        console.error('Error retrieving project details:', error);
+        throw error;
+    }
+};
+
+// Export the model functions
+export {
+    getAllProjects,
+    getProjectsByOrganizationId,
+    getUpcomingProjects,
+    getProjectDetails
+};
