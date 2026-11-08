@@ -1,3 +1,4 @@
+
 import db from './db.js';
 
 /**
@@ -33,4 +34,29 @@ const getAllProjects = async () => {
     }
 };
 
-export { getAllProjects };
+/**
+ * Get projects associated with a specific organization.
+ */
+const getProjectsByOrganizationId = async (organizationId) => {
+    const query = `
+        SELECT
+            project_id,
+            organization_id,
+            name,
+            description,
+            location,
+            project_date
+        FROM project
+        WHERE organization_id = $1
+        ORDER BY project_date ASC;
+    `;
+
+    const queryParams = [organizationId];
+    const result = await db.query(query, queryParams);
+
+    return result.rows;
+};
+
+// Export the model functions
+export { getAllProjects, getProjectsByOrganizationId };
+
