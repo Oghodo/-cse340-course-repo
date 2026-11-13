@@ -7,7 +7,8 @@ import { body, validationResult } from 'express-validator';
 import {
     getAllOrganizations,
     getOrganizationDetails,
-    createOrganization
+    createOrganization,
+    updateOrganization
 } from '../models/organizations.js';
 
 import { getProjectsByOrganizationId } from '../models/projects.js';
@@ -101,16 +102,13 @@ const showNewOrganizationForm = async (req, res) => {
  */
 const processNewOrganizationForm = async (req, res, next) => {
     try {
-        // Check for validation errors
         const results = validationResult(req);
 
         if (!results.isEmpty()) {
-            // Store validation errors as flash messages
             results.array().forEach((error) => {
                 req.flash('error', error.msg);
             });
 
-            // Redirect back to the form
             return res.redirect('/new-organization');
         }
 
@@ -125,11 +123,81 @@ const processNewOrganizationForm = async (req, res, next) => {
             logoFilename
         );
 
-        // Store a success flash message
         req.flash('success', 'Organization added successfully!');
 
-        // Redirect to the new organization's details page
         res.redirect(`/organization/${organizationId}`);
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Display the form for editing an existing organization.
+ */
+const showEditOrganizationForm = async (req, res, next) => {
+    try {
+        const organizationId = req.params.id;
+
+        const organizationDetails = await getOrganizationDetails(organizationId);
+
+        if (!organizationDetails) {
+            const error = new Error('Organization not found.');
+            error.status = 404;
+            return next(error);
+        }
+
+        const title = 'Edit Organization';
+
+        res.render('edit-organization', {
+            title,
+            organizationDetails
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Process the edit organization form submission.
+ */
+const processEditOrganizationForm = async (req, res, next) => {
+    try {
+        const results = validationResult(req);
+
+        if (!results.isEmpty()) {
+            results.array().forEach((error) => {
+                req.flash('error', error.msg);
+            });
+
+            return res.redirect(`/edit-organization/${req.params.id}`);
+        }
+
+        const organizationId = req.params.id;
+
+        const {
+            name,
+            description,
+            contactEmail,
+            logoFilename
+        } = req.body;
+
+        const updatedOrganizationId = await updateOrganization(
+            organizationId,
+            name,
+            description,
+            contactEmail,
+            logoFilename
+        );
+
+        if (!updatedOrganizationId) {
+            const error = new Error('Organization not found.');
+            error.status = 404;
+            return next(error);
+        }
+
+        req.flash('success', 'Organization updated successfully!');
+
+        res.redirect(`/organization/${updatedOrganizationId}`);
     } catch (error) {
         next(error);
     }
@@ -141,5 +209,7 @@ export {
     showOrganizationDetailsPage,
     showNewOrganizationForm,
     processNewOrganizationForm,
+    showEditOrganizationForm,
+    processEditOrganizationForm,
     organizationValidation
 };

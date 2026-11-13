@@ -8,6 +8,8 @@ import {
     showOrganizationDetailsPage,
     showNewOrganizationForm,
     processNewOrganizationForm,
+    showEditOrganizationForm,
+    processEditOrganizationForm,
     organizationValidation
 } from './controllers/organizations.js';
 
@@ -38,6 +40,16 @@ router.post(
     '/new-organization',
     organizationValidation,
     processNewOrganizationForm
+);
+
+// Edit organization form
+router.get('/edit-organization/:id', showEditOrganizationForm);
+
+// Handle edit organization form submission with validation
+router.post(
+    '/edit-organization/:id',
+    organizationValidation,
+    processEditOrganizationForm
 );
 
 // Error-handling route
