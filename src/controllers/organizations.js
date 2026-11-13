@@ -80,6 +80,10 @@ const processNewOrganizationForm = async (req, res) => {
         logoFilename
     );
 
+    // Store a success flash message
+    req.flash('success', 'Organization added successfully!');
+
+    // Redirect to the new organization's details page
     res.redirect(`/organization/${organizationId}`);
 };
 

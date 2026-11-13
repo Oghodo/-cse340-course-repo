@@ -1,7 +1,8 @@
-import session from 'express-session';
 import express from 'express';
+import session from 'express-session';
 import { fileURLToPath } from 'url';
 import path from 'path';
+
 import { testConnection } from './src/models/db.js';
 import router from './src/routes.js';
 import flash from './src/middleware/flash.js';
@@ -9,20 +10,35 @@ import flash from './src/middleware/flash.js';
 // Define the application environment
 const NODE_ENV = process.env.NODE_ENV?.toLowerCase() || 'production';
 
-// Define the port number the server will listen on
+// Define the port number
 const PORT = process.env.PORT || 3000;
 
+// Define the session secret
+const SESSION_SECRET = process.env.SESSION_SECRET;
+
+// Get the current file and directory paths
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Initialize the Express application
 const app = express();
-const SESSION_SECRET = process.env.SESSION_SECRET;
 
 /**
  * Configure Express middleware
  */
 
-// Allow Express to receive and process common POST data
+// Set up session management
+app.use(session({
+    secret: SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { maxAge: 60 * 60 * 1000 }
+}));
+
+// Configure flash message middleware
+app.use(flash);
+
+// Allow Express to receive and process POST data
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -32,21 +48,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Set EJS as the templating engine
 app.set('view engine', 'ejs');
 
-// Tell Express where to find your templates
+// Tell Express where to find the templates
 app.set('views', path.join(__dirname, 'src/views'));
 
-// Use flash message middleware
-app.use(flash);
-
-// Set up session management
-app.use(session({
-    secret: SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true,
-    cookie: { maxAge: 60 * 60 * 1000 } // Session expires after 1 hour of inactivity
-}));
-
-// Middleware to log all incoming requests
+// Middleware to log incoming requests
 app.use((req, res, next) => {
     if (NODE_ENV === 'development') {
         console.log(`${req.method} ${req.url}`);
@@ -54,7 +59,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// Middleware to make NODE_ENV available to all templates
+// Make NODE_ENV available to all EJS templates
 app.use((req, res, next) => {
     res.locals.NODE_ENV = NODE_ENV;
     next();
@@ -70,7 +75,7 @@ app.use((req, res, next) => {
     next(err);
 });
 
-// Global error handler
+// Global error-handling middleware
 app.use((err, req, res, next) => {
     console.error('Error occurred:', err.message);
     console.error('Stack trace:', err.stack);
@@ -94,8 +99,8 @@ app.listen(PORT, async () => {
 
         console.log(`Server is running at http://127.0.0.1:${PORT}`);
         console.log(`Environment: ${NODE_ENV}`);
-
     } catch (error) {
         console.error('Error connecting to the database:', error);
     }
 });
+
