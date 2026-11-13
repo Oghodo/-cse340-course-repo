@@ -12,7 +12,8 @@ const getAllOrganizations = async () => {
             description,
             contact_email,
             logo_filename
-        FROM public.organization;
+        FROM public.organization
+        ORDER BY organization_id ASC;
     `;
 
     const result = await db.query(query);
@@ -30,19 +31,18 @@ const getOrganizationDetails = async (organizationId) => {
             description,
             contact_email,
             logo_filename
-        FROM organization
+        FROM public.organization
         WHERE organization_id = $1;
     `;
 
     const queryParams = [organizationId];
     const result = await db.query(query, queryParams);
 
-    // Return the first row or null if no organization is found
     return result.rows.length > 0 ? result.rows[0] : null;
 };
 
 /**
- * Creates a new organization in the database.
+ * Create a new organization in the database.
  */
 const createOrganization = async (
     name,
@@ -51,7 +51,7 @@ const createOrganization = async (
     logoFilename
 ) => {
     const query = `
-        INSERT INTO organization
+        INSERT INTO public.organization
             (name, description, contact_email, logo_filename)
         VALUES ($1, $2, $3, $4)
         RETURNING organization_id;
@@ -67,7 +67,7 @@ const createOrganization = async (
     const result = await db.query(query, queryParams);
 
     if (result.rows.length === 0) {
-        throw new Error('Failed to create organization');
+        throw new Error('Failed to create organization.');
     }
 
     if (process.env.ENABLE_SQL_LOGGING === 'true') {
@@ -81,7 +81,7 @@ const createOrganization = async (
 };
 
 /**
- * Updates an existing organization in the database.
+ * Update an existing organization in the database.
  */
 const updateOrganization = async (
     organizationId,
@@ -91,7 +91,7 @@ const updateOrganization = async (
     logoFilename
 ) => {
     const query = `
-        UPDATE organization
+        UPDATE public.organization
         SET
             name = $1,
             description = $2,
@@ -115,10 +115,17 @@ const updateOrganization = async (
         return null;
     }
 
+    if (process.env.ENABLE_SQL_LOGGING === 'true') {
+        console.log(
+            'Updated organization with ID:',
+            result.rows[0].organization_id
+        );
+    }
+
     return result.rows[0].organization_id;
 };
 
-// Export the model functions
+// Export the model functions.
 export {
     getAllOrganizations,
     getOrganizationDetails,

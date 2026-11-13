@@ -2,7 +2,7 @@
 import { body, validationResult } from 'express-validator';
 
 /**
- * Import model functions
+ * Import model functions.
  */
 import {
     getAllOrganizations,
@@ -14,7 +14,7 @@ import {
 import { getProjectsByOrganizationId } from '../models/projects.js';
 
 /**
- * Validation and sanitization rules for organization form.
+ * Validation and sanitization rules for organization forms.
  */
 const organizationValidation = [
     body('name')
@@ -74,7 +74,6 @@ const showOrganizationDetailsPage = async (req, res, next) => {
         }
 
         const projects = await getProjectsByOrganizationId(organizationId);
-
         const title = 'Organization Details';
 
         res.render('organization', {
@@ -91,10 +90,14 @@ const showOrganizationDetailsPage = async (req, res, next) => {
 /**
  * Display the form for creating a new organization.
  */
-const showNewOrganizationForm = async (req, res) => {
-    const title = 'Add New Organization';
+const showNewOrganizationForm = async (req, res, next) => {
+    try {
+        const title = 'Add New Organization';
 
-    res.render('new-organization', { title });
+        res.render('new-organization', { title });
+    } catch (error) {
+        next(error);
+    }
 };
 
 /**
@@ -113,7 +116,6 @@ const processNewOrganizationForm = async (req, res, next) => {
         }
 
         const { name, description, contactEmail } = req.body;
-
         const logoFilename = 'placeholder-logo.png';
 
         const organizationId = await createOrganization(
@@ -153,6 +155,7 @@ const showEditOrganizationForm = async (req, res, next) => {
             organizationDetails
         });
     } catch (error) {
+        console.error('Error displaying edit organization form:', error);
         next(error);
     }
 };
@@ -203,7 +206,9 @@ const processEditOrganizationForm = async (req, res, next) => {
     }
 };
 
-// Export controller functions
+/**
+ * Export controller functions.
+ */
 export {
     showOrganizationsPage,
     showOrganizationDetailsPage,
