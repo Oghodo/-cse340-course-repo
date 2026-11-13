@@ -1,3 +1,4 @@
+
 import express from 'express';
 import session from 'express-session';
 import { fileURLToPath } from 'url';
@@ -8,13 +9,14 @@ import router from './src/routes.js';
 import flash from './src/middleware/flash.js';
 
 // Define the application environment
-const NODE_ENV = process.env.NODE_ENV?.toLowerCase() || 'production';
+const NODE_ENV = process.env.NODE_ENV?.toLowerCase() || 'development';
 
 // Define the port number
 const PORT = process.env.PORT || 3000;
 
 // Define the session secret
-const SESSION_SECRET = process.env.SESSION_SECRET;
+const SESSION_SECRET =
+    process.env.SESSION_SECRET || 'development-secret-change-me';
 
 // Get the current file and directory paths
 const __filename = fileURLToPath(import.meta.url);
@@ -32,7 +34,9 @@ app.use(session({
     secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie: { maxAge: 60 * 60 * 1000 }
+    cookie: {
+        maxAge: 60 * 60 * 1000
+    }
 }));
 
 // Configure flash message middleware
@@ -42,13 +46,13 @@ app.use(flash);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Serve static files from the public directory
+// Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Set EJS as the templating engine
 app.set('view engine', 'ejs');
 
-// Tell Express where to find the templates
+// Set the views directory
 app.set('views', path.join(__dirname, 'src/views'));
 
 // Middleware to log incoming requests
@@ -56,6 +60,7 @@ app.use((req, res, next) => {
     if (NODE_ENV === 'development') {
         console.log(`${req.method} ${req.url}`);
     }
+
     next();
 });
 
@@ -65,7 +70,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// Use the imported router to handle routes
+// Use application routes
 app.use(router);
 
 // Catch-all route for 404 errors
@@ -86,7 +91,8 @@ app.use((err, req, res, next) => {
     const context = {
         title: status === 404 ? 'Page Not Found' : 'Server Error',
         error: err.message,
-        stack: err.stack
+        stack: NODE_ENV === 'development' ? err.stack : null,
+        flash: req.flash
     };
 
     res.status(status).render(`errors/${template}`, context);
@@ -103,4 +109,3 @@ app.listen(PORT, async () => {
         console.error('Error connecting to the database:', error);
     }
 });
-

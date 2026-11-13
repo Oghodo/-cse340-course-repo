@@ -18,14 +18,15 @@
     </nav>
 
     <!-- Display flash messages -->
-    <% const messages = flash(); %>
+    <% const messages = typeof flash === 'function' ? flash() : {}; %>
     <% Object.keys(messages).forEach(type => { %>
         <% if (messages[type].length > 0) { %>
-            <% messages[type].forEach(msg => { %>
-                <div class="alert <%= type %>">
-                    <%= msg %>
-                </div>
-            <% }); %>
+            <div class="alert <%= type %>">
+                <% messages[type].forEach(msg => { %>
+                    <p><%= msg %></p>
+                <% }); %>
+            </div>
         <% } %>
     <% }); %>
-
+</body>
+</html>
