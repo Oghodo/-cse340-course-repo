@@ -79,9 +79,6 @@ router.post(
     processAssignCategoriesForm
 );
 
-// Error-handling route
-router.get('/test-error', testErrorPage);
-
 // Organization details page
 router.get('/organization/:id', showOrganizationDetailsPage);
 
@@ -90,5 +87,8 @@ router.get('/project/:id', showProjectDetailsPage);
 
 // Category details page
 router.get('/category/:id', showCategoryDetailsPage);
+
+// Error-handling route
+router.get('/test-error', testErrorPage);
 
 export default router;
