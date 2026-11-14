@@ -98,7 +98,7 @@ const processAssignCategoriesForm = async (req, res, next) => {
         const projectId = req.params.projectId;
 
         // Get selected category IDs from the form.
-        const selectedCategoryIds = req.body.categories || [];
+        const selectedCategoryIds = req.body.categoryIds || [];
 
         // Ensure the selected IDs are always an array.
         const categoryIdsArray = Array.isArray(selectedCategoryIds)
