@@ -1,5 +1,10 @@
 
 import {
+    body,
+    validationResult
+} from 'express-validator';
+
+import {
     getUpcomingProjects,
     getProjectDetails,
     createProject
@@ -15,6 +20,37 @@ import {
 
 // Number of upcoming projects to display
 const NUMBER_OF_UPCOMING_PROJECTS = 5;
+
+/**
+ * Validation rules for new service project forms.
+ */
+const projectValidation = [
+    body('title')
+        .trim()
+        .notEmpty().withMessage('Title is required')
+        .isLength({ min: 3, max: 200 })
+        .withMessage('Title must be between 3 and 200 characters'),
+
+    body('description')
+        .trim()
+        .notEmpty().withMessage('Description is required')
+        .isLength({ max: 999 })
+        .withMessage('Description must be less than 1000 characters'),
+
+    body('location')
+        .trim()
+        .notEmpty().withMessage('Location is required')
+        .isLength({ max: 199 })
+        .withMessage('Location must be less than 200 characters'),
+
+    body('date')
+        .notEmpty().withMessage('Date is required')
+        .isISO8601().withMessage('Date must be a valid date format'),
+
+    body('organizationId')
+        .notEmpty().withMessage('Organization is required')
+        .isInt().withMessage('Organization must be a valid integer')
+];
 
 /**
  * Display the upcoming service projects page.
@@ -83,6 +119,18 @@ const showNewProjectForm = async (req, res, next) => {
  * Process the new service project form submission.
  */
 const processNewProjectForm = async (req, res) => {
+
+    // Check for validation errors
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        errors.array().forEach((error) => {
+            req.flash('error', error.msg);
+        });
+
+        return res.redirect('/new-project');
+    }
+
     const {
         title,
         description,
@@ -123,5 +171,6 @@ export {
     showProjectsPage,
     showProjectDetailsPage,
     showNewProjectForm,
-    processNewProjectForm
+    processNewProjectForm,
+    projectValidation
 };
