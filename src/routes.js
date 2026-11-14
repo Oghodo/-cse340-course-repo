@@ -18,6 +18,8 @@ import {
     showProjectDetailsPage,
     showNewProjectForm,
     processNewProjectForm,
+    showEditProjectForm,
+    processEditProjectForm,
     projectValidation
 } from './controllers/projects.js';
 
@@ -65,6 +67,16 @@ router.post(
     '/new-project',
     projectValidation,
     processNewProjectForm
+);
+
+// Edit service project form
+router.get('/edit-project/:id', showEditProjectForm);
+
+// Handle edit service project form submission with validation
+router.post(
+    '/edit-project/:id',
+    projectValidation,
+    processEditProjectForm
 );
 
 // Assign categories to a project
