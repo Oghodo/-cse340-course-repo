@@ -31,11 +31,11 @@
                             <label>
                                 <input
                                     type="checkbox"
-                                    name="categories"
+                                    name="categoryIds"
                                     value="<%= category.category_id %>"
                                     <%= assignedCategories.some(
                                         assigned =>
-                                            assigned.category_id === category.category_id
+                                            Number(assigned.category_id) === Number(category.category_id)
                                     ) ? 'checked' : '' %>
                                 >
                                 <%= category.name %>
