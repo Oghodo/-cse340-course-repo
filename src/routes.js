@@ -69,13 +69,13 @@ router.post(
 
 // Assign categories to a project
 router.get(
-    '/assign-categories/:projectId',
+    '/project/:projectId/assign-categories',
     showAssignCategoriesForm
 );
 
 // Process category assignments
 router.post(
-    '/assign-categories/:projectId',
+    '/project/:projectId/assign-categories',
     processAssignCategoriesForm
 );
 
