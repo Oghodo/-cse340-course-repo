@@ -40,6 +40,51 @@ const getCategoryById = async (id) => {
 };
 
 /**
+ * Create a new category.
+ */
+const createCategory = async (name) => {
+    try {
+        const query = `
+            INSERT INTO category (name)
+            VALUES ($1)
+            RETURNING category_id;
+        `;
+
+        const result = await db.query(query, [name]);
+
+        return result.rows[0].category_id;
+    } catch (error) {
+        console.error('Error creating category:', error);
+        throw error;
+    }
+};
+
+/**
+ * Update an existing category.
+ */
+const updateCategory = async (id, name) => {
+    try {
+        const query = `
+            UPDATE category
+            SET name = $1
+            WHERE category_id = $2
+            RETURNING category_id;
+        `;
+
+        const result = await db.query(query, [name, id]);
+
+        if (result.rows.length === 0) {
+            throw new Error('Failed to update category.');
+        }
+
+        return result.rows[0].category_id;
+    } catch (error) {
+        console.error('Error updating category:', error);
+        throw error;
+    }
+};
+
+/**
  * Get all categories associated with a service project.
  */
 const getCategoriesByProjectId = async (projectId) => {
@@ -107,6 +152,8 @@ const updateCategoryAssignments = async (projectId, categoryIds) => {
 export {
     getAllCategories,
     getCategoryById,
+    createCategory,
+    updateCategory,
     getCategoriesByProjectId,
     updateCategoryAssignments
 };
