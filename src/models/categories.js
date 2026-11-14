@@ -49,9 +49,9 @@ const getCategoriesByProjectId = async (projectId) => {
                 c.category_id,
                 c.name
             FROM category AS c
-            INNER JOIN project AS p
-                ON c.category_id = p.category_id
-            WHERE p.project_id = $1
+            INNER JOIN project_category AS pc
+                ON c.category_id = pc.category_id
+            WHERE pc.project_id = $1
             ORDER BY c.category_id ASC
         `;
 
@@ -64,9 +64,49 @@ const getCategoriesByProjectId = async (projectId) => {
     }
 };
 
+/**
+ * Assign a category to a service project.
+ */
+const assignCategoryToProject = async (categoryId, projectId) => {
+    try {
+        const query = `
+            INSERT INTO project_category (category_id, project_id)
+            VALUES ($1, $2);
+        `;
+
+        await db.query(query, [categoryId, projectId]);
+    } catch (error) {
+        console.error('Error assigning category to project:', error);
+        throw error;
+    }
+};
+
+/**
+ * Update all category assignments for a service project.
+ */
+const updateCategoryAssignments = async (projectId, categoryIds) => {
+    try {
+        // Remove existing category assignments
+        const deleteQuery = `
+            DELETE FROM project_category
+            WHERE project_id = $1;
+        `;
+
+        await db.query(deleteQuery, [projectId]);
+
+        // Add the newly selected categories
+        for (const categoryId of categoryIds) {
+            await assignCategoryToProject(categoryId, projectId);
+        }
+    } catch (error) {
+        console.error('Error updating project category assignments:', error);
+        throw error;
+    }
+};
+
 export {
     getAllCategories,
     getCategoryById,
-    getCategoriesByProjectId
+    getCategoriesByProjectId,
+    updateCategoryAssignments
 };
-

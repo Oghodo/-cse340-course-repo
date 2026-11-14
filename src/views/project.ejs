@@ -51,8 +51,13 @@
                 <p>No categories assigned to this project.</p>
             <% } %>
         </div>
+
+        <p>
+            <a href="/assign-categories/<%= project.project_id %>">
+                Assign Categories
+            </a>
+        </p>
     </section>
 </main>
 
 <%- include('partials/footer') %>
-
