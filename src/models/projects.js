@@ -37,22 +37,27 @@ const getAllProjects = async () => {
  * Get projects belonging to a specific organization.
  */
 const getProjectsByOrganizationId = async (organizationId) => {
-    const query = `
-        SELECT
-            project_id,
-            organization_id,
-            category_id,
-            name,
-            description,
-            location,
-            project_date
-        FROM project
-        WHERE organization_id = $1
-        ORDER BY project_date ASC;
-    `;
+    try {
+        const query = `
+            SELECT
+                project_id,
+                organization_id,
+                category_id,
+                name,
+                description,
+                location,
+                project_date
+            FROM project
+            WHERE organization_id = $1
+            ORDER BY project_date ASC;
+        `;
 
-    const result = await db.query(query, [organizationId]);
-    return result.rows;
+        const result = await db.query(query, [organizationId]);
+        return result.rows;
+    } catch (error) {
+        console.error('Error retrieving organization projects:', error);
+        throw error;
+    }
 };
 
 /**
@@ -63,8 +68,10 @@ const getUpcomingProjects = async (number_of_projects) => {
         const query = `
             SELECT
                 p.project_id,
+                p.name,
                 p.name AS title,
                 p.description,
+                p.project_date,
                 p.project_date AS date,
                 p.location,
                 p.organization_id,
@@ -94,8 +101,10 @@ const getProjectDetails = async (id) => {
         const query = `
             SELECT
                 p.project_id,
+                p.name,
                 p.name AS title,
                 p.description,
+                p.project_date,
                 p.project_date AS date,
                 p.location,
                 p.organization_id,
@@ -123,9 +132,11 @@ const getProjectsByCategoryId = async (categoryId) => {
         const query = `
             SELECT
                 p.project_id,
+                p.name,
                 p.name AS title,
                 p.description,
                 p.location,
+                p.project_date,
                 p.project_date AS date,
                 p.organization_id,
                 p.category_id,
@@ -188,13 +199,7 @@ const createProject = async (
             throw new Error('Failed to create project.');
         }
 
-        const projectId = result.rows[0].project_id;
-
-        if (process.env.ENABLE_SQL_LOGGING === 'true') {
-            console.log('Created new project with ID:', projectId);
-        }
-
-        return projectId;
+        return result.rows[0].project_id;
     } catch (error) {
         console.error('Error creating project in database:', error);
         throw error;

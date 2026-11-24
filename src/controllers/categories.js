@@ -168,7 +168,7 @@ const processEditCategoryForm = async (req, res, next) => {
 };
 
 /**
- * Display the form for assigning categories to a project.
+ * Display the form for assigning one category to a project.
  */
 const showAssignCategoriesForm = async (req, res, next) => {
     try {
@@ -186,17 +186,22 @@ const showAssignCategoriesForm = async (req, res, next) => {
 
         const assignedCategories = await getCategoriesByProjectId(projectId);
 
-        const title = 'Assign Categories to Project';
+        const selectedCategoryId = assignedCategories.length > 0
+            ? assignedCategories[0].category_id
+            : '';
+
+        const title = 'Assign Category to Project';
 
         res.render('assign-categories', {
             title,
             projectId,
             projectDetails,
             categories,
-            assignedCategories
+            assignedCategories,
+            selectedCategoryId
         });
     } catch (error) {
-        console.error('Error displaying assign categories form:', error);
+        console.error('Error displaying assign category form:', error);
         next(error);
     }
 };
@@ -208,29 +213,40 @@ const processAssignCategoriesForm = async (req, res, next) => {
     try {
         const projectId = req.params.projectId;
 
-        // Get selected category IDs from the form.
-        const selectedCategoryIds = req.body.categoryIds || [];
+        // Accept either a single categoryId or the existing categoryIds field.
+        const selectedCategory = req.body.categoryId ?? req.body.categoryIds;
 
-        // Ensure the selected IDs are always an array.
-        const categoryIdsArray = Array.isArray(selectedCategoryIds)
-            ? selectedCategoryIds
-            : [selectedCategoryIds];
+        if (!selectedCategory) {
+            req.flash('error', 'Please select a category.');
+            return res.redirect(`/project/${projectId}/assign-categories`);
+        }
+
+        // Convert the submitted value into an array.
+        const categoryIdsArray = Array.isArray(selectedCategory)
+            ? selectedCategory
+            : [selectedCategory];
+
+        // A project can have only one category.
+        if (categoryIdsArray.length !== 1) {
+            req.flash('error', 'Please select exactly one category.');
+            return res.redirect(`/project/${projectId}/assign-categories`);
+        }
 
         await updateCategoryAssignments(
             projectId,
             categoryIdsArray
         );
 
-        req.flash('success', 'Categories updated successfully.');
+        req.flash('success', 'Category updated successfully.');
 
         res.redirect(`/project/${projectId}`);
     } catch (error) {
-        console.error('Error updating project categories:', error);
+        console.error('Error updating project category:', error);
         next(error);
     }
 };
 
-// Export controller functions
+// Export controller functions.
 export {
     categoryValidation,
     showCategoriesPage,

@@ -20,7 +20,7 @@ import {
     getAllOrganizations
 } from '../models/organizations.js';
 
-// Number of upcoming projects to display
+// Number of upcoming projects to display.
 const NUMBER_OF_UPCOMING_PROJECTS = 5;
 
 /**
@@ -63,7 +63,10 @@ const projectValidation = [
  */
 const showProjectsPage = async (req, res, next) => {
     try {
-        const projects = await getUpcomingProjects(NUMBER_OF_UPCOMING_PROJECTS);
+        const projects = await getUpcomingProjects(
+            NUMBER_OF_UPCOMING_PROJECTS
+        );
+
         const title = 'Upcoming Service Projects';
 
         res.render('projects', { title, projects });
@@ -109,6 +112,7 @@ const showNewProjectForm = async (req, res, next) => {
     try {
         const organizations = await getAllOrganizations();
         const categories = await getAllCategories();
+
         const title = 'Add New Service Project';
 
         res.render('new-project', {
@@ -125,7 +129,7 @@ const showNewProjectForm = async (req, res, next) => {
 /**
  * Process the new service project form submission.
  */
-const processNewProjectForm = async (req, res) => {
+const processNewProjectForm = async (req, res, next) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -163,13 +167,7 @@ const processNewProjectForm = async (req, res) => {
         res.redirect('/projects');
     } catch (error) {
         console.error('Error creating new project:', error);
-
-        req.flash(
-            'error',
-            'There was an error creating the service project.'
-        );
-
-        res.redirect('/new-project');
+        next(error);
     }
 };
 
@@ -190,6 +188,7 @@ const showEditProjectForm = async (req, res, next) => {
 
         const organizations = await getAllOrganizations();
         const categories = await getAllCategories();
+
         const title = 'Edit Service Project';
 
         res.render('edit-project', {
@@ -252,7 +251,7 @@ const processEditProjectForm = async (req, res, next) => {
     }
 };
 
-// Export controller functions
+// Export controller functions.
 export {
     showProjectsPage,
     showProjectDetailsPage,

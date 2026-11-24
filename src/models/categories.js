@@ -85,7 +85,8 @@ const updateCategory = async (id, name) => {
 };
 
 /**
- * Get all categories associated with a service project.
+ * Get the category assigned to a service project.
+ * Each project has one category through project.category_id.
  */
 const getCategoriesByProjectId = async (projectId) => {
     try {
@@ -94,32 +95,40 @@ const getCategoriesByProjectId = async (projectId) => {
                 c.category_id,
                 c.name
             FROM category AS c
-            INNER JOIN project_category AS pc
-                ON c.category_id = pc.category_id
-            WHERE pc.project_id = $1
-            ORDER BY c.category_id ASC
+            INNER JOIN project AS p
+                ON p.category_id = c.category_id
+            WHERE p.project_id = $1
+            ORDER BY c.category_id ASC;
         `;
 
         const result = await db.query(query, [projectId]);
 
         return result.rows;
     } catch (error) {
-        console.error('Error retrieving project categories:', error);
+        console.error('Error retrieving project category:', error);
         throw error;
     }
 };
 
 /**
- * Assign a category to a service project.
+ * Assign one category to a service project.
  */
 const assignCategoryToProject = async (categoryId, projectId) => {
     try {
         const query = `
-            INSERT INTO project_category (category_id, project_id)
-            VALUES ($1, $2);
+            UPDATE project
+            SET category_id = $1
+            WHERE project_id = $2
+            RETURNING project_id;
         `;
 
-        await db.query(query, [categoryId, projectId]);
+        const result = await db.query(query, [categoryId, projectId]);
+
+        if (result.rows.length === 0) {
+            throw new Error('Project not found.');
+        }
+
+        return result.rows[0].project_id;
     } catch (error) {
         console.error('Error assigning category to project:', error);
         throw error;
@@ -127,24 +136,21 @@ const assignCategoryToProject = async (categoryId, projectId) => {
 };
 
 /**
- * Update all category assignments for a service project.
+ * Update the category assignment for a service project.
+ * Only one category can be assigned to each project.
  */
 const updateCategoryAssignments = async (projectId, categoryIds) => {
     try {
-        // Remove existing category assignments
-        const deleteQuery = `
-            DELETE FROM project_category
-            WHERE project_id = $1;
-        `;
-
-        await db.query(deleteQuery, [projectId]);
-
-        // Add the newly selected categories
-        for (const categoryId of categoryIds) {
-            await assignCategoryToProject(categoryId, projectId);
+        if (!Array.isArray(categoryIds) || categoryIds.length !== 1) {
+            throw new Error('Please select exactly one category.');
         }
+
+        return await assignCategoryToProject(
+            categoryIds[0],
+            projectId
+        );
     } catch (error) {
-        console.error('Error updating project category assignments:', error);
+        console.error('Error updating project category:', error);
         throw error;
     }
 };
@@ -155,5 +161,6 @@ export {
     createCategory,
     updateCategory,
     getCategoriesByProjectId,
+    assignCategoryToProject,
     updateCategoryAssignments
 };

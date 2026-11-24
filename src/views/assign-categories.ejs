@@ -5,7 +5,7 @@
     <h1><%= title %></h1>
 
     <section class="project-details">
-        <h2><%= projectDetails.title %></h2>
+        <h2><%= projectDetails.name %></h2>
 
         <p>
             <strong>Description:</strong>
@@ -21,34 +21,30 @@
             action="/project/<%= projectId %>/assign-categories"
             method="POST"
         >
-            <fieldset>
-                <legend>Select Project Categories</legend>
+            <div class="form-group">
+                <label for="categoryId">Select Project Category</label>
 
-                <% if (categories && categories.length > 0) { %>
+                <select
+                    id="categoryId"
+                    name="categoryId"
+                    required
+                >
+                    <option value="">-- Select a Category --</option>
 
-                    <% categories.forEach(category => { %>
-                        <div class="form-group">
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    name="categoryIds"
-                                    value="<%= category.category_id %>"
-                                    <%= assignedCategories.some(
-                                        assigned =>
-                                            Number(assigned.category_id) === Number(category.category_id)
-                                    ) ? 'checked' : '' %>
-                                >
+                    <% if (categories && categories.length > 0) { %>
+                        <% categories.forEach(category => { %>
+                            <option
+                                value="<%= category.category_id %>"
+                                <%= Number(selectedCategoryId) === Number(category.category_id) ? 'selected' : '' %>
+                            >
                                 <%= category.name %>
-                            </label>
-                        </div>
-                    <% }); %>
+                            </option>
+                        <% }); %>
+                    <% } %>
+                </select>
+            </div>
 
-                <% } else { %>
-                    <p>No categories are currently available.</p>
-                <% } %>
-            </fieldset>
-
-            <button type="submit">Save Categories</button>
+            <button type="submit">Save Category</button>
         </form>
     </section>
 </main>
