@@ -1,6 +1,10 @@
 
 import db from './db.js';
 
+import {
+    updateCategoryAssignments
+} from './categories.js';
+
 /**
  * Get all projects from the database
  * along with their organization and category names.
@@ -15,6 +19,7 @@ const getAllProjects = async () => {
                 p.location,
                 p.project_date,
                 p.organization_id,
+                p.category_id,
                 o.name AS organization_name,
                 c.name AS category_name
             FROM project AS p
@@ -42,6 +47,7 @@ const getProjectsByOrganizationId = async (organizationId) => {
         SELECT
             project_id,
             organization_id,
+            category_id,
             name,
             description,
             location,
@@ -51,8 +57,7 @@ const getProjectsByOrganizationId = async (organizationId) => {
         ORDER BY project_date ASC;
     `;
 
-    const queryParams = [organizationId];
-    const result = await db.query(query, queryParams);
+    const result = await db.query(query, [organizationId]);
 
     return result.rows;
 };
@@ -70,6 +75,7 @@ const getUpcomingProjects = async (number_of_projects) => {
                 p.project_date AS date,
                 p.location,
                 p.organization_id,
+                p.category_id,
                 o.name AS organization_name
             FROM project AS p
             INNER JOIN organization AS o
@@ -101,6 +107,7 @@ const getProjectDetails = async (id) => {
                 p.project_date AS date,
                 p.location,
                 p.organization_id,
+                p.category_id,
                 o.name AS organization_name
             FROM project AS p
             INNER JOIN organization AS o
@@ -130,8 +137,8 @@ const getProjectsByCategoryId = async (categoryId) => {
                 p.location,
                 p.project_date AS date,
                 p.organization_id,
+                p.category_id,
                 o.name AS organization_name,
-                c.category_id,
                 c.name AS category_name
             FROM project AS p
             INNER JOIN organization AS o
@@ -159,37 +166,45 @@ const createProject = async (
     description,
     location,
     date,
-    organizationId
+    organizationId,
+    categoryId
 ) => {
-    const query = `
-        INSERT INTO project
-            (name, description, location, project_date, organization_id)
-        VALUES ($1, $2, $3, $4, $5)
-        RETURNING project_id;
-    `;
+    try {
+        const query = `
+            INSERT INTO project
+                (name, description, location, project_date, organization_id, category_id)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING project_id;
+        `;
 
-    const queryParams = [
-        title,
-        description,
-        location,
-        date,
-        organizationId
-    ];
+        const queryParams = [
+            title,
+            description,
+            location,
+            date,
+            organizationId,
+            categoryId
+        ];
 
-    const result = await db.query(query, queryParams);
+        const result = await db.query(query, queryParams);
 
-    if (result.rows.length === 0) {
-        throw new Error('Failed to create project.');
+        if (result.rows.length === 0) {
+            throw new Error('Failed to create project.');
+        }
+
+        const projectId = result.rows[0].project_id;
+
+        await updateCategoryAssignments(projectId, [categoryId]);
+
+        if (process.env.ENABLE_SQL_LOGGING === 'true') {
+            console.log('Created new project with ID:', projectId);
+        }
+
+        return projectId;
+    } catch (error) {
+        console.error('Error creating project in database:', error);
+        throw error;
     }
-
-    if (process.env.ENABLE_SQL_LOGGING === 'true') {
-        console.log(
-            'Created new project with ID:',
-            result.rows[0].project_id
-        );
-    }
-
-    return result.rows[0].project_id;
 };
 
 /**
@@ -201,36 +216,46 @@ const updateProject = async (
     description,
     location,
     date,
-    organizationId
+    organizationId,
+    categoryId
 ) => {
-    const query = `
-        UPDATE project
-        SET
-            name = $1,
-            description = $2,
-            location = $3,
-            project_date = $4,
-            organization_id = $5
-        WHERE project_id = $6
-        RETURNING project_id;
-    `;
+    try {
+        const query = `
+            UPDATE project
+            SET
+                name = $1,
+                description = $2,
+                location = $3,
+                project_date = $4,
+                organization_id = $5,
+                category_id = $6
+            WHERE project_id = $7
+            RETURNING project_id;
+        `;
 
-    const queryParams = [
-        title,
-        description,
-        location,
-        date,
-        organizationId,
-        projectId
-    ];
+        const queryParams = [
+            title,
+            description,
+            location,
+            date,
+            organizationId,
+            categoryId,
+            projectId
+        ];
 
-    const result = await db.query(query, queryParams);
+        const result = await db.query(query, queryParams);
 
-    if (result.rows.length === 0) {
-        throw new Error('Failed to update project.');
+        if (result.rows.length === 0) {
+            throw new Error('Failed to update project.');
+        }
+
+        await updateCategoryAssignments(projectId, [categoryId]);
+
+        return result.rows[0].project_id;
+    } catch (error) {
+        console.error('Error updating project in database:', error);
+        throw error;
     }
-
-    return result.rows[0].project_id;
 };
 
 // Export the model functions.

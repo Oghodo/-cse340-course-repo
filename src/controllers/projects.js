@@ -12,7 +12,8 @@ import {
 } from '../models/projects.js';
 
 import {
-    getCategoriesByProjectId
+    getCategoriesByProjectId,
+    getAllCategories
 } from '../models/categories.js';
 
 import {
@@ -50,7 +51,11 @@ const projectValidation = [
 
     body('organizationId')
         .notEmpty().withMessage('Organization is required')
-        .isInt().withMessage('Organization must be a valid integer')
+        .isInt().withMessage('Organization must be a valid integer'),
+
+    body('categoryId')
+        .notEmpty().withMessage('Category is required')
+        .isInt().withMessage('Category must be a valid integer')
 ];
 
 /**
@@ -69,8 +74,7 @@ const showProjectsPage = async (req, res, next) => {
 };
 
 /**
- * Display details of a single service project
- * including its associated categories.
+ * Display details of a single service project.
  */
 const showProjectDetailsPage = async (req, res, next) => {
     try {
@@ -104,11 +108,13 @@ const showProjectDetailsPage = async (req, res, next) => {
 const showNewProjectForm = async (req, res, next) => {
     try {
         const organizations = await getAllOrganizations();
+        const categories = await getAllCategories();
         const title = 'Add New Service Project';
 
         res.render('new-project', {
             title,
-            organizations
+            organizations,
+            categories
         });
     } catch (error) {
         console.error('Error displaying new project form:', error);
@@ -135,7 +141,8 @@ const processNewProjectForm = async (req, res) => {
         description,
         location,
         date,
-        organizationId
+        organizationId,
+        categoryId
     } = req.body;
 
     try {
@@ -144,7 +151,8 @@ const processNewProjectForm = async (req, res) => {
             description,
             location,
             date,
-            organizationId
+            organizationId,
+            categoryId
         );
 
         req.flash(
@@ -181,12 +189,14 @@ const showEditProjectForm = async (req, res, next) => {
         }
 
         const organizations = await getAllOrganizations();
+        const categories = await getAllCategories();
         const title = 'Edit Service Project';
 
         res.render('edit-project', {
             title,
             project,
-            organizations
+            organizations,
+            categories
         });
     } catch (error) {
         console.error('Error displaying edit project form:', error);
@@ -215,7 +225,8 @@ const processEditProjectForm = async (req, res, next) => {
         description,
         location,
         date,
-        organizationId
+        organizationId,
+        categoryId
     } = req.body;
 
     try {
@@ -225,7 +236,8 @@ const processEditProjectForm = async (req, res, next) => {
             description,
             location,
             date,
-            organizationId
+            organizationId,
+            categoryId
         );
 
         req.flash(
