@@ -29,6 +29,10 @@ const app = express();
  * Configure Express middleware
  */
 
+// Parse incoming form and JSON data
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
 // Set up session management
 app.use(session({
     secret: SESSION_SECRET,
@@ -41,10 +45,6 @@ app.use(session({
 
 // Configure flash message middleware
 app.use(flash);
-
-// Allow Express to receive and process POST data
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
@@ -64,13 +64,13 @@ app.use((req, res, next) => {
     next();
 });
 
-// Make NODE_ENV available to all EJS templates
+// Make NODE_ENV available to EJS templates
 app.use((req, res, next) => {
     res.locals.NODE_ENV = NODE_ENV;
     next();
 });
 
-// Use application routes
+// Register application routes
 app.use(router);
 
 // Catch-all route for 404 errors

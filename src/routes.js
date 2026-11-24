@@ -39,65 +39,62 @@ import { testErrorPage } from './controllers/errors.js';
 
 const router = express.Router();
 
+// Home page
 router.get('/', showHomePage);
+
+// Main listing pages
 router.get('/organizations', showOrganizationsPage);
 router.get('/projects', showProjectsPage);
 router.get('/categories', showCategoriesPage);
 
-// New organization form
+// Create organization
 router.get('/new-organization', showNewOrganizationForm);
 
-// Handle new organization form submission with validation
 router.post(
     '/new-organization',
     organizationValidation,
     processNewOrganizationForm
 );
 
-// Edit organization form
+// Edit organization
 router.get('/edit-organization/:id', showEditOrganizationForm);
 
-// Handle edit organization form submission with validation
 router.post(
     '/edit-organization/:id',
     organizationValidation,
     processEditOrganizationForm
 );
 
-// New service project form
+// Create service project
 router.get('/new-project', showNewProjectForm);
 
-// Handle new service project form submission with validation
 router.post(
     '/new-project',
     projectValidation,
     processNewProjectForm
 );
 
-// Edit service project form
+// Edit service project
 router.get('/edit-project/:id', showEditProjectForm);
 
-// Handle edit service project form submission with validation
 router.post(
     '/edit-project/:id',
     projectValidation,
     processEditProjectForm
 );
 
-// New category form
+// Create category
 router.get('/new-category', showNewCategoryForm);
 
-// Handle new category form submission with validation
 router.post(
     '/new-category',
     categoryValidation,
     processNewCategoryForm
 );
 
-// Edit category form
+// Edit category
 router.get('/edit-category/:id', showEditCategoryForm);
 
-// Handle edit category form submission with validation
 router.post(
     '/edit-category/:id',
     categoryValidation,
@@ -110,22 +107,21 @@ router.get(
     showAssignCategoriesForm
 );
 
-// Process category assignments
 router.post(
     '/project/:projectId/assign-categories',
     processAssignCategoriesForm
 );
 
-// Organization details page
+// Organization details
 router.get('/organization/:id', showOrganizationDetailsPage);
 
-// Service project details page
+// Project details
 router.get('/project/:id', showProjectDetailsPage);
 
-// Category details page
+// Category details
 router.get('/category/:id', showCategoryDetailsPage);
 
-// Error-handling route
+// Test error page
 router.get('/test-error', testErrorPage);
 
 export default router;
