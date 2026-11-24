@@ -1,13 +1,8 @@
 
 import db from './db.js';
 
-import {
-    updateCategoryAssignments
-} from './categories.js';
-
 /**
- * Get all projects from the database
- * along with their organization and category names.
+ * Get all projects with their organization and category names.
  */
 const getAllProjects = async () => {
     try {
@@ -31,7 +26,6 @@ const getAllProjects = async () => {
         `;
 
         const result = await db.query(query);
-
         return result.rows;
     } catch (error) {
         console.error('Error retrieving projects:', error);
@@ -40,7 +34,7 @@ const getAllProjects = async () => {
 };
 
 /**
- * Get projects associated with a specific organization.
+ * Get projects belonging to a specific organization.
  */
 const getProjectsByOrganizationId = async (organizationId) => {
     const query = `
@@ -58,12 +52,11 @@ const getProjectsByOrganizationId = async (organizationId) => {
     `;
 
     const result = await db.query(query, [organizationId]);
-
     return result.rows;
 };
 
 /**
- * Get upcoming service projects from the database.
+ * Get upcoming service projects.
  */
 const getUpcomingProjects = async (number_of_projects) => {
     try {
@@ -86,7 +79,6 @@ const getUpcomingProjects = async (number_of_projects) => {
         `;
 
         const result = await db.query(query, [number_of_projects]);
-
         return result.rows;
     } catch (error) {
         console.error('Error retrieving upcoming projects:', error);
@@ -95,7 +87,7 @@ const getUpcomingProjects = async (number_of_projects) => {
 };
 
 /**
- * Get details of a single service project by its ID.
+ * Get details of one service project.
  */
 const getProjectDetails = async (id) => {
     try {
@@ -116,7 +108,6 @@ const getProjectDetails = async (id) => {
         `;
 
         const result = await db.query(query, [id]);
-
         return result.rows[0];
     } catch (error) {
         console.error('Error retrieving project details:', error);
@@ -125,7 +116,7 @@ const getProjectDetails = async (id) => {
 };
 
 /**
- * Get all service projects belonging to a specific category.
+ * Get projects belonging to a specific category.
  */
 const getProjectsByCategoryId = async (categoryId) => {
     try {
@@ -150,7 +141,6 @@ const getProjectsByCategoryId = async (categoryId) => {
         `;
 
         const result = await db.query(query, [categoryId]);
-
         return result.rows;
     } catch (error) {
         console.error('Error retrieving projects by category:', error);
@@ -159,7 +149,7 @@ const getProjectsByCategoryId = async (categoryId) => {
 };
 
 /**
- * Create a new service project in the database.
+ * Create a new service project.
  */
 const createProject = async (
     title,
@@ -171,8 +161,14 @@ const createProject = async (
 ) => {
     try {
         const query = `
-            INSERT INTO project
-                (name, description, location, project_date, organization_id, category_id)
+            INSERT INTO project (
+                name,
+                description,
+                location,
+                project_date,
+                organization_id,
+                category_id
+            )
             VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING project_id;
         `;
@@ -194,8 +190,6 @@ const createProject = async (
 
         const projectId = result.rows[0].project_id;
 
-        await updateCategoryAssignments(projectId, [categoryId]);
-
         if (process.env.ENABLE_SQL_LOGGING === 'true') {
             console.log('Created new project with ID:', projectId);
         }
@@ -208,7 +202,7 @@ const createProject = async (
 };
 
 /**
- * Update an existing service project in the database.
+ * Update an existing service project.
  */
 const updateProject = async (
     projectId,
@@ -249,8 +243,6 @@ const updateProject = async (
             throw new Error('Failed to update project.');
         }
 
-        await updateCategoryAssignments(projectId, [categoryId]);
-
         return result.rows[0].project_id;
     } catch (error) {
         console.error('Error updating project in database:', error);
@@ -258,7 +250,6 @@ const updateProject = async (
     }
 };
 
-// Export the model functions.
 export {
     getAllProjects,
     getProjectsByOrganizationId,
