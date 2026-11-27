@@ -1,4 +1,3 @@
-
 -- ============================================================
 -- CSE 340 SERVICE NETWORK DATABASE
 -- Complete Database Setup
@@ -176,7 +175,36 @@ ON CONFLICT (role_name) DO NOTHING;
 
 
 -- ============================================================
--- 10. INDEXES
+-- 10. ASSIGN DEDICATED ADMIN TESTING ACCOUNT
+-- ============================================================
+
+-- The admin account must first be registered through the website.
+-- This ensures the password is securely hashed using bcrypt.
+
+UPDATE users
+SET role_id = (
+    SELECT role_id
+    FROM roles
+    WHERE role_name = 'admin'
+)
+WHERE email = 'admin@example.com';
+
+
+-- Verify the dedicated admin account and its assigned role.
+
+SELECT
+    users.user_id,
+    users.name,
+    users.email,
+    roles.role_name
+FROM users
+INNER JOIN roles
+    ON users.role_id = roles.role_id
+WHERE users.email = 'admin@example.com';
+
+
+-- ============================================================
+-- 11. INDEXES
 -- ============================================================
 
 CREATE INDEX IF NOT EXISTS idx_project_organization
@@ -193,7 +221,7 @@ ON users(role_id);
 
 
 -- ============================================================
--- 11. DATABASE VERIFICATION
+-- 12. DATABASE VERIFICATION
 -- ============================================================
 
 SELECT 'Organizations' AS table_name, COUNT(*) AS total_records
@@ -221,7 +249,7 @@ FROM users;
 
 
 -- ============================================================
--- 12. VERIFY PROJECTS PER ORGANIZATION
+-- 13. VERIFY PROJECTS PER ORGANIZATION
 -- ============================================================
 
 SELECT
@@ -236,7 +264,7 @@ ORDER BY o.organization_id;
 
 
 -- ============================================================
--- 13. VERIFY PROJECT, ORGANIZATION AND CATEGORY RELATIONSHIPS
+-- 14. VERIFY PROJECT, ORGANIZATION AND CATEGORY RELATIONSHIPS
 -- ============================================================
 
 SELECT

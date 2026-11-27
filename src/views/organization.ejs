@@ -1,3 +1,4 @@
+
 <%- include('partials/header') %>
 
 <main>
@@ -23,11 +24,13 @@
             </a>
         </p>
 
-        <p>
-            <a href="/edit-organization/<%= organizationDetails.organization_id %>">
-                Edit Organization
-            </a>
-        </p>
+        <% if (user && user.role_name === 'admin') { %>
+            <p>
+                <a href="/edit-organization/<%= organizationDetails.organization_id %>">
+                    Edit Organization
+                </a>
+            </p>
+        <% } %>
 
         <h3>Service Projects by This Organization</h3>
 

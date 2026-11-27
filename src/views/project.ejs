@@ -50,17 +50,19 @@
             <% } %>
         </div>
 
-        <p>
-            <a href="/edit-project/<%= project.project_id %>">
-                Edit Project
-            </a>
-        </p>
+        <% if (user && user.role_name === 'admin') { %>
+            <p>
+                <a href="/edit-project/<%= project.project_id %>">
+                    Edit Project
+                </a>
+            </p>
 
-        <p>
-            <a href="/project/<%= project.project_id %>/assign-categories">
-                Change Project Category
-            </a>
-        </p>
+            <p>
+                <a href="/project/<%= project.project_id %>/assign-categories">
+                    Change Project Category
+                </a>
+            </p>
+        <% } %>
     </section>
 </main>
 
