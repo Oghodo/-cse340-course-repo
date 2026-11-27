@@ -1,3 +1,4 @@
+
 import db from './db.js';
 import bcrypt from 'bcrypt';
 
@@ -6,6 +7,7 @@ import bcrypt from 'bcrypt';
  */
 const createUser = async (name, email, passwordHash) => {
     const default_role = 'user';
+    const normalizedEmail = email.trim().toLowerCase();
 
     const query = `
         INSERT INTO users (name, email, password_hash, role_id)
@@ -13,7 +15,7 @@ const createUser = async (name, email, passwordHash) => {
         RETURNING user_id
     `;
 
-    const queryParams = [name, email, passwordHash, default_role];
+    const queryParams = [name, normalizedEmail, passwordHash, default_role];
 
     const result = await db.query(query, queryParams);
 
@@ -32,6 +34,8 @@ const createUser = async (name, email, passwordHash) => {
  * Find a user by email address.
  */
 const findUserByEmail = async (email) => {
+    const normalizedEmail = email.trim().toLowerCase();
+
     const query = `
         SELECT
             u.user_id,
@@ -45,7 +49,7 @@ const findUserByEmail = async (email) => {
         WHERE u.email = $1
     `;
 
-    const queryParams = [email];
+    const queryParams = [normalizedEmail];
 
     const result = await db.query(query, queryParams);
 

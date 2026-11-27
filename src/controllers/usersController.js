@@ -1,4 +1,6 @@
+
 import bcrypt from 'bcrypt';
+
 import {
     createUser,
     authenticateUser,
@@ -20,11 +22,11 @@ const processUserRegistrationForm = async (req, res) => {
         const passwordHash = await bcrypt.hash(password, salt);
 
         // Create the user in the database
-        const userId = await createUser(name, email, passwordHash);
+        await createUser(name, email, passwordHash);
 
         // Redirect after successful registration
         req.flash('success', 'Registration successful! Please log in.');
-        return res.redirect('/');
+        return res.redirect('/login');
 
     } catch (error) {
         console.error('Error registering user:', error);
@@ -45,22 +47,37 @@ const processLoginForm = async (req, res) => {
     try {
         const user = await authenticateUser(email, password);
 
-        if (user) {
-            // Store user information in the session
+        if (!user) {
+            req.flash('error', 'Invalid email or password.');
+            return res.redirect('/login');
+        }
+
+        // Regenerate session ID after successful authentication
+        req.session.regenerate((error) => {
+            if (error) {
+                console.error('Error regenerating session:', error);
+                return res.redirect('/login');
+            }
+
+            // Store authenticated user information in the new session
             req.session.user = user;
 
             req.flash('success', 'Login successful!');
 
             if (res.locals.NODE_ENV === 'development') {
-                console.log('User logged in:', user);
+                console.log('User logged in successfully:', user.user_id);
             }
 
-            // Redirect to dashboard after successful login
-            return res.redirect('/dashboard');
-        } else {
-            req.flash('error', 'Invalid email or password.');
-            return res.redirect('/login');
-        }
+            // Save session before redirecting
+            req.session.save((saveError) => {
+                if (saveError) {
+                    console.error('Error saving session:', saveError);
+                    return res.redirect('/login');
+                }
+
+                return res.redirect('/dashboard');
+            });
+        });
 
     } catch (error) {
         console.error('Error during login:', error);
@@ -74,7 +91,7 @@ const processLogout = (req, res) => {
     req.session.destroy((error) => {
         if (error) {
             console.error('Error destroying session:', error);
-            return res.redirect('/login');
+            return res.redirect('/dashboard');
         }
 
         return res.redirect('/login');
@@ -92,11 +109,11 @@ const requireLogin = (req, res, next) => {
 };
 
 /**
- * Middleware factory to require specific role for route access.
+ * Middleware factory to require a specific role for route access.
  */
 const requireRole = (role) => {
     return (req, res, next) => {
-        // Check if user is logged in first
+        // Check if user is logged in
         if (!req.session || !req.session.user) {
             req.flash('error', 'You must be logged in to access this page.');
             return res.redirect('/login');
@@ -135,6 +152,7 @@ const showUsers = async (req, res, next) => {
             title: 'Registered Users',
             users
         });
+
     } catch (error) {
         console.error('Error displaying registered users:', error);
         next(error);

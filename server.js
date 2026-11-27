@@ -1,3 +1,4 @@
+
 import express from 'express';
 import session from 'express-session';
 import { fileURLToPath } from 'url';
@@ -45,6 +46,15 @@ app.use(session({
 // Configure flash message middleware
 app.use(flash);
 
+// Make login status, user information, and NODE_ENV available to EJS templates
+app.use((req, res, next) => {
+    res.locals.isLoggedIn = Boolean(req.session.user);
+    res.locals.user = req.session.user || null;
+    res.locals.NODE_ENV = NODE_ENV;
+
+    next();
+});
+
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -59,22 +69,6 @@ app.use((req, res, next) => {
     if (NODE_ENV === 'development') {
         console.log(`${req.method} ${req.url}`);
     }
-
-    next();
-});
-
-// Make login status, user information, and NODE_ENV available to EJS templates
-app.use((req, res, next) => {
-    res.locals.isLoggedIn = false;
-
-    if (req.session && req.session.user) {
-        res.locals.isLoggedIn = true;
-    }
-
-    // Make the current user's session data available to all templates
-    res.locals.user = req.session.user || null;
-
-    res.locals.NODE_ENV = NODE_ENV;
 
     next();
 });
