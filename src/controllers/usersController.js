@@ -1,7 +1,8 @@
 import bcrypt from 'bcrypt';
 import {
     createUser,
-    authenticateUser
+    authenticateUser,
+    getAllUsers
 } from '../models/users.js';
 
 // Display the registration form
@@ -104,7 +105,7 @@ const requireRole = (role) => {
         // Check if user's role matches the required role
         if (req.session.user.role_name !== role) {
             req.flash('error', 'You do not have permission to access this page.');
-            return res.redirect('/');
+            return res.redirect('/dashboard');
         }
 
         // User has the required role
@@ -123,6 +124,23 @@ const showDashboard = (req, res) => {
     });
 };
 
+/**
+ * Display all registered users.
+ */
+const showUsers = async (req, res, next) => {
+    try {
+        const users = await getAllUsers();
+
+        res.render('users', {
+            title: 'Registered Users',
+            users
+        });
+    } catch (error) {
+        console.error('Error displaying registered users:', error);
+        next(error);
+    }
+};
+
 // Export controller functions
 export {
     showUserRegistrationForm,
@@ -132,5 +150,6 @@ export {
     processLogout,
     requireLogin,
     requireRole,
-    showDashboard
+    showDashboard,
+    showUsers
 };

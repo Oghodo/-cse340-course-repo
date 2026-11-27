@@ -57,6 +57,27 @@ const findUserByEmail = async (email) => {
 };
 
 /**
+ * Retrieve all registered users and their roles.
+ */
+const getAllUsers = async () => {
+    const query = `
+        SELECT
+            u.user_id,
+            u.name,
+            u.email,
+            r.role_name
+        FROM users u
+        INNER JOIN roles r
+            ON u.role_id = r.role_id
+        ORDER BY u.user_id ASC
+    `;
+
+    const result = await db.query(query);
+
+    return result.rows;
+};
+
+/**
  * Verify the user's password.
  */
 const verifyPassword = async (password, passwordHash) => {
@@ -89,5 +110,6 @@ const authenticateUser = async (email, password) => {
 
 export {
     createUser,
-    authenticateUser
+    authenticateUser,
+    getAllUsers
 };
